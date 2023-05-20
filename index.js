@@ -26,10 +26,10 @@ async function run() {
 
     const database = client.db('toysDB');
     const toysCollection = database.collection('toys')
-    app.get('/toys/:text', async (req, res) => {
+    app.get('/single/toys/:text', async (req, res) => {
       console.log(req.params.text);
       if (req.params.text == 'barbie' || req.params.text == 'american girl' || req.params.text == 'baby dolls') {
-        const result = await toysCollection.find({ subCategory: req.params.text }).toArray();
+        const result = await toysCollection.find({ subCategory: req.params.text }).limit(2).toArray();
         console.log(result);
         return res.send(result);
       }
@@ -46,8 +46,8 @@ async function run() {
     app.get('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
-      const user = await toysCollection.findOne(query)
-      res.send(user);
+      const toy = await toysCollection.findOne(query)
+      res.send(toy);
     });
     // Send a ping to confirm a successful connection
     app.get('/toys', async (req, res) => {
@@ -56,7 +56,7 @@ async function run() {
       if (req.query?.email) {
         query = { email: req.query.email }
       }
-      const result = await toysCollection.find(query).toArray();
+      const result = await toysCollection.find(query).limit(20).toArray();
       res.send(result);
 
     })
@@ -92,11 +92,7 @@ async function run() {
       res.send(result);
     })
     // 
-    app.get('/toys',(req, res) => {
-      const limit = parseInt(req.query.limit) || 20;
-      res.send(toys.slice(0, limit));
-
-    })
+    
     // view details
     app.get('/viewdetails/:id', async (req, res) => {
       const id = req.params.id;
