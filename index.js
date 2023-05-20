@@ -92,7 +92,7 @@ async function run() {
       res.send(result);
     })
     // 
-    
+
     // view details
     app.get('/viewdetails/:id', async (req, res) => {
       const id = req.params.id;
@@ -100,6 +100,23 @@ async function run() {
       const result = await toysCollection.findOne(query);
       res.send(result)
     })
+    // searching
+    const indexKeys = { name: 1 };
+    const indexOptions = { name: 'toyName' };
+    const result = await toysCollection.createIndex(indexKeys, indexOptions);
+    
+    app.get('/toyNameSearch/:text', async (req,res) => {
+      const searchText = req.params.text;
+      const result = await toysCollection.find({
+        $or: [
+          { name: { $regex: searchText, $options: 'i' } },
+        ],
+      })
+        .toArray();
+      res.send(result);
+    });
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
