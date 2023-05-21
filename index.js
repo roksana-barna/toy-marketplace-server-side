@@ -52,33 +52,16 @@ async function run() {
     app.get('/toys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
-      const toy = await toysCollection.findOne(query)
+      const toy = await toysCollection.findOne(query).limit(20)
       res.send(toy);
     });
     // toys
     app.get('/toys',async(req,res)=>{
-      const cursor=toysCollection.find()
+      const cursor=toysCollection.find().limit(20);
       const result=await cursor.toArray();
       res.send(result);
     })
-    // Send a ping to confirm a successful connection
-    // app.get('/toys/:sortBy/:email', async (req, res) => {
-    //   const email = req.params.email;
-    //   const sortBy = req.params.sortBy;
-    //   console.log(sortBy);
-    //   // let sort = { price: -1 };
-    //   // if (sortByPrice !== 0) {
-    //   //    const sort = { price: sortByPrice };
-    //   // }
-    //   let query = {};
-    //   if (email) {
-    //     query = { email: email }
-    //   }
-    //   const sort = { price: sortByPrice };
-    //   const result = await toysCollection.find(query).sort(sort).limit(20).toArray();
-    //   res.send(result);
-
-    // })
+    // // 
     // sort
     app.get('/toys/:email/:sortByPrice', async (req, res) => {
       const email = req.params.email;
