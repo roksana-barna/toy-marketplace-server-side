@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    
 
     const database = client.db('toysDB');
     const toysCollection = database.collection('toys')
@@ -49,17 +49,44 @@ async function run() {
       const toy = await toysCollection.findOne(query)
       res.send(toy);
     });
-    // Send a ping to confirm a successful connection
-    app.get('/toys', async (req, res) => {
-      console.log(req.query.email);
-      let query = {};
-      if (req.query?.email) {
-        query = { email: req.query.email }
-      }
-      const result = await toysCollection.find(query).limit(20).toArray();
+    // toys
+    app.get('/toys',async(req,res)=>{
+      const cursor=toysCollection.find()
+      const result=await cursor.toArray();
       res.send(result);
-
     })
+    // Send a ping to confirm a successful connection
+    // app.get('/toys/:sortBy/:email', async (req, res) => {
+    //   const email = req.params.email;
+    //   const sortBy = req.params.sortBy;
+    //   console.log(sortBy);
+    //   // let sort = { price: -1 };
+    //   // if (sortByPrice !== 0) {
+    //   //    const sort = { price: sortByPrice };
+    //   // }
+    //   let query = {};
+    //   if (email) {
+    //     query = { email: email }
+    //   }
+    //   const sort = { price: sortByPrice };
+    //   const result = await toysCollection.find(query).sort(sort).limit(20).toArray();
+    //   res.send(result);
+
+    // })
+    // sort
+    app.get('/toys/:email/:sortByPrice', async (req, res) => {
+      const email = req.params.email;
+      const sortByPrice = req.params.sortByPrice;
+      const query = {email : email};
+       const sort = { price:sortByPrice};
+       console.log(email)
+       console.log(sortByPrice)
+      
+
+      const cursor =  toysCollection.find(query).sort(sort).collation({locale: "en_US", numericOrdering: true}).limit(20);
+      const result = await cursor.toArray();
+      return res.send(result);
+  })
 
     // update
     app.get('/update/:id', async (req, res) => {
@@ -104,18 +131,21 @@ async function run() {
     const indexKeys = { name: 1 };
     const indexOptions = { name: 'toyName' };
     const result = await toysCollection.createIndex(indexKeys, indexOptions);
-    
-    app.get('/toyNameSearch/:text', async (req,res) => {
-      const searchText = req.params.text;
-      const result = await toysCollection.find({
-        $or: [
-          { name: { $regex: searchText, $options: 'i' } },
-        ],
-      })
+    console.log(result);
+
+    app.get("/toyNameSearch/:text", async (req, res) => {
+      const text = req.params.text;
+      // console.log(text)
+      const result = await toysCollection
+        .find({
+          $or: [
+            { name: { $regex: text, $options: "i" } },
+          ],
+        })
         .toArray();
       res.send(result);
     });
-
+    // 
 
 
     await client.db("admin").command({ ping: 1 });
